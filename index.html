@@ -1,0 +1,2072 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>ForG - Monicia</title>
+        <link href="https://cdn.jsdelivr.net/npm/semantic-ui-css@2.5.0/semantic.min.css" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/semantic-ui-css@2.5.0/components/card.css" rel="stylesheet">
+        <script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/semantic-ui-css@2.5.0/semantic.min.js"></script>
+        <title>Snowflake Animation</title>
+        <style>
+            body {
+                margin: 0;
+                background: transparent;
+                overflow-x: hidden;
+            }
+
+            .snowflake {
+                position: fixed;
+                top: -10px;
+                color: black;
+                font-size: 10px;
+                animation: fall linear infinite;
+                opacity: 0.8;
+            }
+
+            @keyframes fall {
+                0% {
+                    transform: translateX(0px) translateY(0px) rotate(0deg);
+                    opacity: 0.8;
+                }
+
+                50% {
+                    transform: translateX(30px) translateY(50vh) rotate(180deg);
+                }
+
+                100% {
+                    transform: translateX(-30px) translateY(100vh) rotate(360deg);
+                    opacity: 0;
+                }
+            }
+
+            .control-panel {
+                position: fixed;
+                top: 10px;
+                right: 10px;
+                z-index: 1000;
+                background: #d8e6e2;
+                /* 修复背景颜色语法 */
+                color: black;
+                padding: 10px;
+                border-radius: 5px;
+                font-family: Arial, sans-serif;
+                box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+                /* 添加阴影效果 */
+            }
+
+            .control-panel button {
+                background: white;
+                color: black;
+                border: none;
+                padding: 5px 10px;
+                border-radius: 3px;
+                cursor: pointer;
+                transition: background 0.3s ease, box-shadow 0.3s ease;
+                /* 添加过渡效果 */
+            }
+
+            .control-panel button:hover {
+                background: #f0f0f0;
+                /* 鼠标悬停时改变背景色 */
+                box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+                /* 添加悬停阴影 */
+            }
+
+            /* 响应式设计：小屏幕优化 */
+            @media (max-width: 600px) {
+                .control-panel {
+                    top: 5px;
+                    right: 5px;
+                    padding: 8px;
+                }
+
+                .control-panel button {
+                    padding: 4px 8px;
+                    font-size: 14px;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="control-panel">
+            <button id="toggleSnow">Disable Snow</button>
+        </div>
+        <button id="theme-toggle" aria-label="Toggle Dark Mode">🌙</button>
+        <script>
+            const snowflakeCharacters = ["❄", "❅", "❆", "✻", "✼", "✽"];
+            let snowflakeInterval = null;
+            // 定时器变量
+            let snowEnabled = true;
+            // 雪花开关状态
+            let currentSnowflakeCount = 0;
+            // 当前页面上的雪花数量
+            const MAX_SNOWFLAKES = 100;
+            // 最大雪花数量限制
+
+            function createSnowflake() {
+                if (currentSnowflakeCount >= MAX_SNOWFLAKES)
+                    return;
+                // 如果雪花数量超过限制，停止创建
+
+                const snowflake = document.createElement("div");
+                snowflake.className = "snowflake";
+                snowflake.textContent = snowflakeCharacters[Math.floor(Math.random() * snowflakeCharacters.length)];
+                snowflake.style.left = Math.random() * 100 + "vw";
+                snowflake.style.animationDuration = 4 + Math.random() * 4 + "s";
+                snowflake.style.fontSize = 10 + Math.random() * 20 + "px";
+                snowflake.style.opacity = 0.4 + Math.random() * 0.4;
+
+                document.body.appendChild(snowflake);
+                currentSnowflakeCount++;
+                // 增加雪花计数
+
+                // 动画结束后移除雪花
+                snowflake.addEventListener("animationend", () => {
+                    snowflake.remove();
+                    currentSnowflakeCount--;
+                    // 减少雪花计数
+                }
+                );
+            }
+
+            function initializeSnowflakes(count) {
+                // 定时创建雪花
+                snowflakeInterval = setInterval( () => {
+                    for (let i = 0; i < count; i++) {
+                        createSnowflake();
+                    }
+                }
+                , 500);
+            }
+
+            function clearSnowflakes() {
+                // 清除所有雪花
+                const snowflakes = document.querySelectorAll(".snowflake");
+                snowflakes.forEach( (snowflake) => snowflake.remove());
+                currentSnowflakeCount = 0;
+                // 重置雪花计数
+            }
+
+            function toggleSnow() {
+                snowEnabled = !snowEnabled;
+
+                if (snowEnabled) {
+                    // 开启雪花
+                    const isMobile = window.innerWidth <= 768;
+                    const snowflakeCount = isMobile ? 1 : 2;
+                    // 每次创建的雪花数量
+                    initializeSnowflakes(snowflakeCount);
+                    document.getElementById("toggleSnow").textContent = "Disable Snow";
+                } else {
+                    // 停止雪花
+                    clearInterval(snowflakeInterval);
+                    clearSnowflakes();
+                    document.getElementById("toggleSnow").textContent = "Enable Snow";
+                }
+            }
+
+            // 初始化雪花效果
+            const isMobile = window.innerWidth <= 768;
+            const snowflakeCount = isMobile ? 1 : 2;
+            // 每次创建的雪花数量
+            initializeSnowflakes(snowflakeCount);
+
+            // 添加按钮事件
+            document.getElementById("toggleSnow").addEventListener("click", toggleSnow);
+            // 防止重复执行
+            (function() {
+                // 如果已经初始化过，则不再执行
+                if (window.themeInitialized)
+                    return;
+                window.themeInitialized = true;
+
+                // 等待页面加载完成
+                document.addEventListener('DOMContentLoaded', function() {
+                    // 获取存储的主题设置
+                    const currentTheme = localStorage.getItem('theme');
+
+                    // 如果用户之前选择了暗黑模式，则应用暗黑模式
+                    if (currentTheme === 'dark') {
+                        document.body.classList.add('dark-mode');
+                    }
+
+                    // 获取切换按钮
+                    const themeToggleButton = document.getElementById('theme-toggle');
+
+                    // 切换暗黑模式与正常模式
+                    themeToggleButton.addEventListener('click', function() {
+                        document.body.classList.toggle('dark-mode');
+                        // 切换 'dark-mode' 类
+
+                        // 如果当前是暗黑模式，存储 'dark'，否则存储 'light'
+                        if (document.body.classList.contains('dark-mode')) {
+                            localStorage.setItem('theme', 'dark');
+                            themeToggleButton.textContent = '🌕';
+                            // 设置为亮模式图标
+                        } else {
+                            localStorage.setItem('theme', 'light');
+                            themeToggleButton.textContent = '🌙';
+                            // 设置为暗模式图标
+                        }
+                    });
+                });
+            }
+            )();
+        </script>
+        <header>
+            <div id="head" class="ui inverted vertical masthead center aligned segment">
+                <div id="nav" class="ui container">
+                    <div class="ui large secondary inverted menu">
+                        <div class="item">
+                            <p id="hitokoto">条条大路通罗马</p>
+                        </div>
+                    </div>
+                </div>
+                <div id="title" class="ui text container">
+                    <h1 class="ui inverted header">
+                        <i class="spinner icon"></i>
+                        <div class="content">
+                            ForG<div class="sub header">Monicia</div>
+                        </div>
+                    </h1>
+                    <div class="ui left corner labeled right icon fluid large input">
+                        <div class="ui left corner label">
+                            <img id="search-fav" class="left floated avatar ui image" src="https://www.google.com/favicon.ico"></img>
+                        </div>
+                        <input id="searchinput" type="search" placeholder="come on……" autocomplete="off"></input>
+                        <i class="inverted circular search link icon"></i>
+                    </div>
+                    <div id="sengine" class="ui bottom attached tabular inverted secondary menu">
+                        <div class="header item">&nbsp;</div>
+                        <a class="active item" data-url="https://www.google.com/search?q=$s">Google</a>
+                        <a class="item" data-url="https://www.bing.com/search?q=$s">Bing</a>
+                        <a class="item" data-url="https://www.sogou.com/web?query=$s">Sogou</a>
+                        <a class="item" data-url="https://www.baidu.com/s?wd=$s">Baidu</a>
+                    </div>
+                    <div>
+                        <a id="menubtn" class="red ui icon inverted button">
+                            <i class="heart icon"></i>
+                            like it? 
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </header>
+        <main style="width: 100%; max-width: 2160px; margin: 0 auto;">
+            <div class="ui container">
+                <div class="ui basic segment">
+                    <h4 class="ui horizontal divider header">
+                        <i class="language icon"></i>
+                        Question circle
+                    </h4>
+                    <div class="ui five stackable cards">
+                        <a class="card" href=https://www.youdao.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://www.youdao.com/></img>
+                                <div class="header">有道词典</div>
+                                <div class="meta">dictionaries</div>
+                            </div>
+                        </a>
+                        <a class="card" href=http://fanyi.youdao.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=http://fanyi.youdao.com/></img>
+                                <div class="header">有道翻译</div>
+                                <div class="meta">translate</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://translate.google.com/?hl= zh-CN&sl=auto&tl= zh-CN&op=translate target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://translate.google.com/?hl= zh-CN&sl=auto&tl= zh-CN&op=translate></img>
+                                <div class="header">Translate</div>
+                                <div class="meta">google translate</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://chatgpt.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://chatgpt.com/></img>
+                                <div class="header">Gpt</div>
+                                <div class="meta">Chatgpt</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://chat.deepseek.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://chat.deepseek.com/></img>
+                                <div class="header">DeepSeek</div>
+                                <div class="meta">developer+</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://tongyi.aliyun.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://tongyi.aliyun.com/></img>
+                                <div class="header">qwen</div>
+                                <div class="meta">developer-</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://kimi.moonshot.cn/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://kimi.moonshot.cn/></img>
+                                <div class="header">kimi</div>
+                                <div class="meta">developer-</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.doubao.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://www.doubao.com/></img>
+                                <div class="header">doubao</div>
+                                <div class="meta">developer-</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://claude.ai/chat/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://claude.ai/chat/></img>
+                                <div class="header">claude</div>
+                                <div class="meta">developer-</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.notion.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://www.notion.com/></img>
+                                <div class="header">notion</div>
+                                <div class="meta">tools</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://notion.lauuroo.eu.org/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://notion.lauuroo.eu.org/></img>
+                                <div class="header">Notion web</div>
+                                <div class="meta">Notion build</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://gemini.google.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://gemini.google.com/></img>
+                                <div class="header">gemini chat</div>
+                                <div class="meta">developer-</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.perplexity.ai/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://www.perplexity.ai/></img>
+                                <div class="header">perplexity.ai</div>
+                                <div class="meta">developer-</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://x.com/i/grok target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://x.com/i/grok></img>
+                                <div class="header">Grok chat</div>
+                                <div class="meta">developer-</div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                <div class="ui basic segment">
+                    <h4 class="ui horizontal divider header">
+                        <i class="terminal icon"></i>
+                        User secret
+                    </h4>
+                    <div class="ui five stackable cards">
+                        <a class="card" href=https://panel14.serv00.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://panel14.serv00.com/></img>
+                                <div class="header">serv00</div>
+                                <div class="meta">s14 panel</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://panel.serv00.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://panel.serv00.com/></img>
+                                <div class="header">serv00</div>
+                                <div class="meta">各个可选赛区panel</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://github.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://github.com/></img>
+                                <div class="header">GitHub</div>
+                                <div class="meta">Let's build from here·GitHub</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://dash.cloudflare.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://dash.cloudflare.com/></img>
+                                <div class="header">Cloudflare</div>
+                                <div class="meta">CDN&DNS &More</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://accounts.gcore.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://accounts.gcore.com/></img>
+                                <div class="header">Gcore</div>
+                                <div class="meta">CDN&DNS</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.fastly.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://www.fastly.com/></img>
+                                <div class="header">fastly</div>
+                                <div class="meta">CDN&DNS</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://hub.docker.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://hub.docker.com/></img>
+                                <div class="header">hub.docker</div>
+                                <div class="meta">space</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://vercel.com/dashboard target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://vercel.com/dashboard></img>
+                                <div class="header">Vercel</div>
+                                <div class="meta">容器产品</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://replit.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://replit.com/></img>
+                                <div class="header">Replit</div>
+                                <div class="meta">based IDE</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.koyeb.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://www.koyeb.com/></img>
+                                <div class="header">Koyeb</div>
+                                <div class="meta">developer-</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://app.netlify.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://app.netlify.com/></img>
+                                <div class="header">Netlify</div>
+                                <div class="meta">developer-</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://huggingface.co/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://huggingface.co/></img>
+                                <div class="header">huggingface</div>
+                                <div class="meta">developer-</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://websim.ai/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://websim.ai/></img>
+                                <div class="header">websim</div>
+                                <div class="meta">ai search_engine</div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                <div class="ui basic segment">
+                    <h4 class="ui horizontal divider header">
+                        <i class="compass outline icon"></i>
+                        Lazy
+                    </h4>
+                    <div class="ui five stackable cards">
+                        <a class="card" href=http://192.168.31.44/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=http://192.168.31.44/></img>
+                                <div class="header">Luci</div>
+                                <div class="meta">wRT</div>
+                            </div>
+                        </a>
+                        <a class="card" href=http://192.168.31.1/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=http://192.168.31.1/></img>
+                                <div class="header">miRouter</div>
+                                <div class="meta">HomewRT</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://5ddd.com/synonas target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://5ddd.com/synonas></img>
+                                <div class="header">_NAS</div>
+                                <div class="meta">FnOS Inc.</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://5ddd.com/synonas:5666/v target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://5ddd.com/synonas:5666/v></img>
+                                <div class="header">NAS_Media</div>
+                                <div class="meta">FnOS Inc.</div>
+                            </div>
+                        </a>
+                        <a class="card" href=http://docker.imm5535w.eu.org:881/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=http://docker.imm5535w.eu.org:881/></img>
+                                <div class="header">Nginx</div>
+                                <div class="meta">Nginx NAS.</div>
+                            </div>
+                        </a>
+                        <a class="card" href=http://nezha.whistlesdog.eu.org:8008/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=http://nezha.whistlesdog.eu.org:8008/></img>
+                                <div class="header">Nezha</div>
+                                <div class="meta">keep alive.</div>
+                            </div>
+                        </a>
+                        <a class="card" href=http://docker.imm5535w.eu.org:8083/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=http://docker.imm5535w.eu.org:8083/></img>
+                                <div class="header">Calibre</div>
+                                <div class="meta">calibre-web.</div>
+                            </div>
+                        </a>
+                        <a class="card" href=http://docker.imm5535w.eu.org:15700/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=http://docker.imm5535w.eu.org:15700/></img>
+                                <div class="header">QingLong</div>
+                                <div class="meta">xxx.</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://mind.lauuroo.eu.org/#/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://mind.lauuroo.eu.org/#/></img>
+                                <div class="header">Mind+</div>
+                                <div class="meta">思维导图.</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://rss.imm5535w.eu.org/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://rss.imm5535w.eu.org/></img>
+                                <div class="header">RSS +</div>
+                                <div class="meta">RSS.</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://free-for.dev/#/?id= monitoring target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://free-for.dev/#/?id= monitoring></img>
+                                <div class="header">RSS+++</div>
+                                <div class="meta">资源列表.</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://apps.disroot.org/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://apps.disroot.org/></img>
+                                <div class="header">disroot search</div>
+                                <div class="meta">search_engine</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://sub.freedogs.us.kg/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://sub.freedogs.us.kg/></img>
+                                <div class="header">sub Link</div>
+                                <div class="meta">sublink worker</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://app.uptimeobserver.com/dashboard target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://app.uptimeobserver.com/dashboard></img>
+                                <div class="header">uptimeobserver</div>
+                                <div class="meta">Monitoring</div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                <div class="ui basic segment">
+                    <h4 class="ui horizontal divider header">
+                        <i class="youtube icon"></i>
+                        Lifestyle
+                    </h4>
+                    <div class="ui five stackable cards">
+                        <a class="card" href=https://www.ted.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://www.ted.com/></img>
+                                <div class="header">TED</div>
+                                <div class="meta">Learning</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://tv.cctv.com/live/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://tv.cctv.com/live/></img>
+                                <div class="header">cctv</div>
+                                <div class="meta">life</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.tiktok.com/explore target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://www.tiktok.com/explore></img>
+                                <div class="header">TikTok</div>
+                                <div class="meta">life</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.youtube.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://www.youtube.com/></img>
+                                <div class="header">YouTube</div>
+                                <div class="meta">life</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.bilibili.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://www.bilibili.com/></img>
+                                <div class="header">bilibili</div>
+                                <div class="meta">life</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.ixigua.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://www.ixigua.com/></img>
+                                <div class="header">西瓜视频</div>
+                                <div class="meta">life</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://x.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://x.com/></img>
+                                <div class="header">x</div>
+                                <div class="meta">life</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.instagram.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://www.instagram.com/></img>
+                                <div class="header">ins</div>
+                                <div class="meta">life</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.facebook.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://www.facebook.com/></img>
+                                <div class="header">fb</div>
+                                <div class="meta">Watching forgs</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.threads.net/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://www.threads.net/></img>
+                                <div class="header">threads</div>
+                                <div class="meta">Watching forgs</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://weibo.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://weibo.com/></img>
+                                <div class="header">Sina</div>
+                                <div class="meta">life</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.xiaohongshu.com/explore target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://www.xiaohongshu.com/explore></img>
+                                <div class="header">xiaohongshu</div>
+                                <div class="meta">life</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://ww4.fmovies.co/home/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://ww4.fmovies.co/home/></img>
+                                <div class="header">FREE movies</div>
+                                <div class="meta">movies</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.iyf.tv/list/drama?region= %E5%A4%A7%E9%99%86 target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://www.iyf.tv/list/drama?region= %E5%A4%A7%E9%99%86></img>
+                                <div class="header">FREE TV</div>
+                                <div class="meta">TV shows</div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                <div class="ui basic segment">
+                    <h4 class="ui horizontal divider header">
+                        <i class="odnoklassniki icon"></i>
+                        Page △
+                    </h4>
+                    <div class="ui five stackable cards">
+                        <a class="card" href=https://bikini.42web.io/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://bikini.42web.io/></img>
+                                <div class="header">WordPress</div>
+                                <div class="meta">dash.infinityfree.com</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://mp.weixin.qq.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://mp.weixin.qq.com/></img>
+                                <div class="header">wechat</div>
+                                <div class="meta">公众号</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://nav.pekingbikini.us.kg/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://nav.pekingbikini.us.kg/></img>
+                                <div class="header">Nav</div>
+                                <div class="meta">Nav&searching</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://githubnav.pekingbikini.us.kg/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://githubnav.pekingbikini.us.kg/></img>
+                                <div class="header">githubNav</div>
+                                <div class="meta">Nav&searching</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://zh.m.wikipedia.org/wiki/Wikipedia:%E9%A6%96%E9%A1%B5 target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://zh.m.wikipedia.org/wiki/Wikipedia:%E9%A6%96%E9%A1%B5></img>
+                                <div class="header">Wiki</div>
+                                <div class="meta">Wikipedia</div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                <div class="ui basic segment">
+                    <h4 class="ui horizontal divider header">
+                        <i class="hacker news square icon"></i>
+                        Square
+                    </h4>
+                    <div class="ui five stackable cards">
+                        <a class="card" href=https://z-lib.gl/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://z-lib.gl/></img>
+                                <div class="header">zlibrary</div>
+                                <div class="meta">books library</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://archive.org/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://archive.org/></img>
+                                <div class="header">library</div>
+                                <div class="meta">non-profit library</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://openlibrary.org/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://openlibrary.org/></img>
+                                <div class="header">library</div>
+                                <div class="meta">open library书籍居多</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.zhihu.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://www.zhihu.com/></img>
+                                <div class="header">zhihu</div>
+                                <div class="meta">News</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.quora.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://www.quora.com/></img>
+                                <div class="header">美版zhihu</div>
+                                <div class="meta">News</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.reddit.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://www.reddit.com/></img>
+                                <div class="header">reddit</div>
+                                <div class="meta">News</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.universetoday.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://www.universetoday.com/></img>
+                                <div class="header">Space news</div>
+                                <div class="meta">Space and astronomy news</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.britannica.com/science/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://www.britannica.com/science/></img>
+                                <div class="header">britannica</div>
+                                <div class="meta">science news</div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                <div class="ui basic segment">
+                    <h4 class="ui horizontal divider header">
+                        <i class="mixcloud icon"></i>
+                        Clouds
+                    </h4>
+                    <div class="ui five stackable cards">
+                        <a class="card" href=https://mega.io/zh-hans/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://mega.io/zh-hans/></img>
+                                <div class="header">MEGA</div>
+                                <div class="meta">MEGA 网盘</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.alipan.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://www.alipan.com/></img>
+                                <div class="header">Ali</div>
+                                <div class="meta">Cloud</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.alibabacloud.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://www.alibabacloud.com/></img>
+                                <div class="header">Ali</div>
+                                <div class="meta">Cloud</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://drive.google.com/drive/home target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://drive.google.com/drive/home></img>
+                                <div class="header">google drive</div>
+                                <div class="meta">Cloud</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://pan.quark.cn/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://pan.quark.cn/></img>
+                                <div class="header">quark</div>
+                                <div class="meta">Cloud</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://cloud.189.cn/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://cloud.189.cn/></img>
+                                <div class="header">189</div>
+                                <div class="meta">Cloud</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://pan.baidu.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://pan.baidu.com/></img>
+                                <div class="header">BaiDu</div>
+                                <div class="meta">国内版</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.terabox.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://www.terabox.com/></img>
+                                <div class="header">BaiDu</div>
+                                <div class="meta">海外版</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.mediafire.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://www.mediafire.com/></img>
+                                <div class="header">MediaFire</div>
+                                <div class="meta">网盘</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://app.filen.io/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://app.filen.io/></img>
+                                <div class="header">Filen</div>
+                                <div class="meta">网盘</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://infini-cloud.net/en/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://infini-cloud.net/en/></img>
+                                <div class="header">infini</div>
+                                <div class="meta">日本网盘</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://dashboard.blomp.com/dashboard/index target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://dashboard.blomp.com/dashboard/index></img>
+                                <div class="header">blomp</div>
+                                <div class="meta">blomp cloud</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://mypikpak.com/drive/all target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://mypikpak.com/drive/all></img>
+                                <div class="header">pikpak</div>
+                                <div class="meta">pikpak cloud</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.tencentcloud.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://www.tencentcloud.com/></img>
+                                <div class="header">Tencent</div>
+                                <div class="meta">Cloud</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://auth.huaweicloud.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://auth.huaweicloud.com/></img>
+                                <div class="header">HuaWei</div>
+                                <div class="meta">Cloud</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://aws.amazon.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://aws.amazon.com/></img>
+                                <div class="header">aws cloud</div>
+                                <div class="meta">aws</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://nerdvm.racknerd.com/login.php target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://nerdvm.racknerd.com/login.php></img>
+                                <div class="header">RackNerd</div>
+                                <div class="meta">I I Stability</div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                <div class="ui basic segment">
+                    <h4 class="ui horizontal divider header">
+                        <i class="info icon"></i>
+                        inFo
+                    </h4>
+                    <div class="ui five stackable cards">
+                        <a class="card" href=https://www.lumiproxy.com/zh-hans/online-proxy/croxyproxy/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://www.lumiproxy.com/zh-hans/online-proxy/croxyproxy/></img>
+                                <div class="header">free-proxy</div>
+                                <div class="meta">connectivity</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.croxyproxy.rocks/_zh/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://www.croxyproxy.rocks/_zh/></img>
+                                <div class="header">free-proxy</div>
+                                <div class="meta">connectivity</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://ip.sb/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://ip.sb/></img>
+                                <div class="header">iP check</div>
+                                <div class="meta">IPv4&IPv6 connectivity</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://ip125.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://ip125.com/></img>
+                                <div class="header">iP me</div>
+                                <div class="meta">IPv4&IPv6 connectivity</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://ip.skk.moe/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://ip.skk.moe/></img>
+                                <div class="header">iP check</div>
+                                <div class="meta">iP出站CND&命中</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://test.ustc.edu.cn/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://test.ustc.edu.cn/></img>
+                                <div class="header">speedtest</div>
+                                <div class="meta">中科大国内测速</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://ipinfo-free-api-clq.pages.dev/api target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://ipinfo-free-api-clq.pages.dev/api></img>
+                                <div class="header">ipinfo-cf</div>
+                                <div class="meta">Own IP </div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://iphub.info/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://iphub.info/></img>
+                                <div class="header">info-google</div>
+                                <div class="meta">Own IP </div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://librespeed.org/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://librespeed.org/></img>
+                                <div class="header">Open Source Speed Test</div>
+                                <div class="meta">全球各站测速</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.speedtest.net/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://www.speedtest.net/></img>
+                                <div class="header">SpeedTest</div>
+                                <div class="meta">常规操作</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://fiber.google.com/speedtest/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://fiber.google.com/speedtest/></img>
+                                <div class="header">GoogleTest</div>
+                                <div class="meta">优选iP&反代iP测速</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.comparitech.com/privacy-security-tools/blockedinchina/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://www.comparitech.com/privacy-security-tools/blockedinchina/></img>
+                                <div class="header">Test if a site is blocked in China</div>
+                                <div class="meta">查核站点是否不通</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://browserleaks.com/dns target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://browserleaks.com/dns></img>
+                                <div class="header">DNS check</div>
+                                <div class="meta">DNS泄露查询</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://dnschecker.org/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://dnschecker.org/></img>
+                                <div class="header">DNS check</div>
+                                <div class="meta">DNS查询</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://spys.one/en/non-anonymous-proxy-list/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://spys.one/en/non-anonymous-proxy-list/></img>
+                                <div class="header">bestip_proxy List</div>
+                                <div class="meta">反代iP查找</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://openproxylist.com/v2ray/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://openproxylist.com/v2ray/></img>
+                                <div class="header">IP List</div>
+                                <div class="meta">反代iP查找</div>
+                            </div>
+                        </a>
+                        <a class="card" href=http://free-proxy.cz/en/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=http://free-proxy.cz/en/></img>
+                                <div class="header">IP List</div>
+                                <div class="meta">反代iP查找</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.ip123.in/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://www.ip123.in/></img>
+                                <div class="header">IP List</div>
+                                <div class="meta">iP权重 API接口</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://scamalytics.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://scamalytics.com/></img>
+                                <div class="header">Scamalytics</div>
+                                <div class="meta">IP 清洁度查询</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://boce.aliyun.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://boce.aliyun.com/></img>
+                                <div class="header">detect/http</div>
+                                <div class="meta">网络拨测</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://ping0.cc/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://ping0.cc/></img>
+                                <div class="header">ping0.cc</div>
+                                <div class="meta">IP 纯净度查询</div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                <div class="ui basic segment">
+                    <h4 class="ui horizontal divider header">
+                        <i class="blind icon"></i>
+                        News
+                    </h4>
+                    <div class="ui five stackable cards">
+                        <a class="card" href=https://w3school.com.cn/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://w3school.com.cn/></img>
+                                <div class="header">W3school在线教程</div>
+                                <div class="meta">space</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://segmentfault.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://segmentfault.com/></img>
+                                <div class="header">思否社区</div>
+                                <div class="meta">程序员集散地</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://jianshu.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://jianshu.com/></img>
+                                <div class="header">简书</div>
+                                <div class="meta">程序员集散地</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://v2ex.com target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://v2ex.com></img>
+                                <div class="header">V2EX</div>
+                                <div class="meta">space</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://oschina.net/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://oschina.net/></img>
+                                <div class="header">开源中国</div>
+                                <div class="meta">NET</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://csdn.net/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://csdn.net/></img>
+                                <div class="header">CSDN技术社区</div>
+                                <div class="meta">People</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://gitee.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://gitee.com/></img>
+                                <div class="header">gitee</div>
+                                <div class="meta">News</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.51cto.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://www.51cto.com/></img>
+                                <div class="header">51cto</div>
+                                <div class="meta">News</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.bookstack.cn/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://www.bookstack.cn/></img>
+                                <div class="header">书栈网</div>
+                                <div class="meta">IT 互联网开源编程书籍免费阅读与下载。</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.appinn.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://www.appinn.com/></img>
+                                <div class="header">appinn</div>
+                                <div class="meta">News</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://news.ycombinator.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://news.ycombinator.com/></img>
+                                <div class="header">hacker-news</div>
+                                <div class="meta">一家关于计算机黑客和创业公司的社会化新闻网站。</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://juejin.cn/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://juejin.cn/></img>
+                                <div class="header">稀土掘金</div>
+                                <div class="meta">IT社会网站。</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.toutiao.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://www.toutiao.com/></img>
+                                <div class="header">今日头条</div>
+                                <div class="meta">News</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://news.163.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://news.163.com/></img>
+                                <div class="header">网易新闻</div>
+                                <div class="meta">News</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://apphot.cc/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://apphot.cc/></img>
+                                <div class="header">App Hot</div>
+                                <div class="meta">News</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.gamersky.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://www.gamersky.com/></img>
+                                <div class="header">gamersky</div>
+                                <div class="meta">Games</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://linux.do/latest target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://linux.do/latest></img>
+                                <div class="header">linux.do</div>
+                                <div class="meta">linux</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://lowendspirit.com/discussions target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://lowendspirit.com/discussions></img>
+                                <div class="header">lowendspirit</div>
+                                <div class="meta">discussions</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://lowendtalk.com/discussions target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://lowendtalk.com/discussions></img>
+                                <div class="header">lowendtalk</div>
+                                <div class="meta">discussions</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.nodeloc.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://www.nodeloc.com/></img>
+                                <div class="header">nodeloc</div>
+                                <div class="meta">discussions</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.nodeseek.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://www.nodeseek.com/></img>
+                                <div class="header">nodeseek</div>
+                                <div class="meta">discussions</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://hellogithub.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://hellogithub.com/></img>
+                                <div class="header">github 热榜</div>
+                                <div class="meta">discussions</div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                <div class="ui basic segment">
+                    <h4 class="ui horizontal divider header">
+                        <i class="windowclose icon"></i>
+                        Window Close
+                    </h4>
+                    <div class="ui five stackable cards">
+                        <a class="card" href=https://dynv6.com/users/sign_in target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://dynv6.com/users/sign_in></img>
+                                <div class="header">DYNV6</div>
+                                <div class="meta">DDNS</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://register.us.kg/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://register.us.kg/></img>
+                                <div class="header">us.kg</div>
+                                <div class="meta">need</div>
+                            </div>
+                        </a>
+                        <a class="card" href=http://my.zerotier.com/network/52b337794f999370 target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=http://my.zerotier.com/network/52b337794f999370></img>
+                                <div class="header">ZeroTier</div>
+                                <div class="meta">routing</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://cli.im/url target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://cli.im/url></img>
+                                <div class="header">QR</div>
+                                <div class="meta">在线QR制作</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.processon.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://www.processon.com/></img>
+                                <div class="header">ProcessOn</div>
+                                <div class="meta">在线作图</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.cloudns.net/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://www.cloudns.net/></img>
+                                <div class="header">Free DNS</div>
+                                <div class="meta">DNS</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://relay.firefox.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://relay.firefox.com/></img>
+                                <div class="header">firefox relay</div>
+                                <div class="meta">firefox马甲</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://getpocket.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://getpocket.com/></img>
+                                <div class="header">Pocket</div>
+                                <div class="meta">saves</div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                <div class="ui basic segment">
+                    <h4 class="ui horizontal divider header">
+                        <i class="google plus square icon"></i>
+                        Mail
+                    </h4>
+                    <div class="ui five stackable cards">
+                        <a class="card" href=https://www.zoho.com/mail/login.html target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://www.zoho.com/mail/login.html></img>
+                                <div class="header">zoho Mail</div>
+                                <div class="meta">Mail.pm</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://wx.mail.qq.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://wx.mail.qq.com/></img>
+                                <div class="header">QQ Mail</div>
+                                <div class="meta">Mail.pm</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://e.mail.ru/inbox target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://e.mail.ru/inbox></img>
+                                <div class="header">Mail.ru</div>
+                                <div class="meta">Mail.ru</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://mail.proton.me/u/15/inbox target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://mail.proton.me/u/15/inbox></img>
+                                <div class="header">ProtonMail</div>
+                                <div class="meta">Mail.pm</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://mail.google.com/mail/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://mail.google.com/mail/></img>
+                                <div class="header">Gmail</div>
+                                <div class="meta">Mail.pm</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.126.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://www.126.com/></img>
+                                <div class="header">126 Mail</div>
+                                <div class="meta">Mail.pm</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://mail.aliyun.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://mail.aliyun.com/></img>
+                                <div class="header">aliyun Mail</div>
+                                <div class="meta">Mail.pm</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://webmail.disroot.org/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://webmail.disroot.org/></img>
+                                <div class="header">disroot Mail</div>
+                                <div class="meta">.pm</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://tempmail.best/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://tempmail.best/></img>
+                                <div class="header">Temp Mail</div>
+                                <div class="meta">临时邮箱</div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                <div class="ui basic segment">
+                    <h4 class="ui horizontal divider header">
+                        <i class="dna icon"></i>
+                        Technology
+                    </h4>
+                    <div class="ui five stackable cards">
+                        <a class="card" href=https://www.ncbi.nlm.nih.gov/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://www.ncbi.nlm.nih.gov/></img>
+                                <div class="header">NCBI</div>
+                                <div class="meta">National Center for Biotechnology Information.</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://anaconda.org/bioconda/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://anaconda.org/bioconda/></img>
+                                <div class="header">Bioconda</div>
+                                <div class="meta">Bioconda :: Anaconda.org.</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://metacpan.org/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://metacpan.org/></img>
+                                <div class="header">CPAN</div>
+                                <div class="meta">Search the CPAN.</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://galaxyproject.org/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://galaxyproject.org/></img>
+                                <div class="header">Galaxy Project</div>
+                                <div class="meta">Galaxy Community Hub.</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.r-project.org/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://www.r-project.org/></img>
+                                <div class="header">R Project</div>
+                                <div class="meta">r-project.org</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.bioconductor.org/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://www.bioconductor.org/></img>
+                                <div class="header">Bioconductor</div>
+                                <div class="meta">bioconductor.org</div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                <div class="ui basic segment">
+                    <h4 class="ui horizontal divider header">
+                        <i class="fly icon"></i>
+                        划水项目
+                    </h4>
+                    <div class="ui five stackable cards">
+                        <a class="card" href=https://www.netflix.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://www.netflix.com/></img>
+                                <div class="header">Netflix</div>
+                                <div class="meta">不感冒。</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.disneyplus.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://www.disneyplus.com/></img>
+                                <div class="header">Disney+</div>
+                                <div class="meta">不感冒。</div>
+                            </div>
+                        </a>
+                        <a class="card" href=http://v.qq.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=http://v.qq.com/></img>
+                                <div class="header">腾讯</div>
+                                <div class="meta">不感冒。</div>
+                            </div>
+                        </a>
+                        <a class="card" href=http://www.youku.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=http://www.youku.com/></img>
+                                <div class="header">优酷</div>
+                                <div class="meta">我才酷。</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.iqiyi.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://www.iqiyi.com/></img>
+                                <div class="header">爱奇艺</div>
+                                <div class="meta">没兴趣。</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.mgtv.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://www.mgtv.com/></img>
+                                <div class="header">芒果 TV</div>
+                                <div class="meta">mgtv</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://music.163.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://music.163.com/></img>
+                                <div class="header">网易云</div>
+                                <div class="meta">人人都会网郁！</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://weread.qq.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://weread.qq.com/></img>
+                                <div class="header">微信读书</div>
+                                <div class="meta">微信读书电脑版。</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.qidian.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://www.qidian.com/></img>
+                                <div class="header">起点</div>
+                                <div class="meta">爽文站点。</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.jjwxc.net/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://www.jjwxc.net/></img>
+                                <div class="header">晋江文学城</div>
+                                <div class="meta">爽文站点。</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://fanqienovel.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://fanqienovel.com/></img>
+                                <div class="header">番茄小说</div>
+                                <div class="meta">爽文站点。</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://m.ximalaya.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://m.ximalaya.com/></img>
+                                <div class="header">喜马拉雅</div>
+                                <div class="meta">有声小说。</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.ahhhhfs.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://www.ahhhhfs.com/></img>
+                                <div class="header">ahhhhfs</div>
+                                <div class="meta">资源站。</div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                <div class="ui basic segment">
+                    <h4 class="ui horizontal divider header">
+                        <i class="spinner icon"></i>
+                        素材库
+                    </h4>
+                    <div class="ui five stackable cards">
+                        <a class="card" href=https://www.iconfinder.com target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://www.iconfinder.com></img>
+                                <div class="header">Iconfinder</div>
+                                <div class="meta">2,100,000+ free and premium vector icons.</div>
+                            </div>
+                        </a>
+                        <a class="card" href=http://www.iconfont.cn/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=http://www.iconfont.cn/></img>
+                                <div class="header">iconfont</div>
+                                <div class="meta">阿里巴巴矢量图标库。</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://iconmonstr.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://iconmonstr.com/></img>
+                                <div class="header">iconmonstr</div>
+                                <div class="meta">Free simple icons for your next project.</div>
+                            </div>
+                        </a>
+                        <a class="card" href=http://www.iconarchive.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=http://www.iconarchive.com/></img>
+                                <div class="header">Icon Archive</div>
+                                <div class="meta">Search 590,912 free icons.</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://findicons.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://findicons.com/></img>
+                                <div class="header">FindIcons</div>
+                                <div class="meta">Search through 300,000 free icons.</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://icomoon.io/app/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://icomoon.io/app/></img>
+                                <div class="header">IcoMoonApp</div>
+                                <div class="meta">Icon Font, SVG, PDF &amp;PNG Generator.</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.flaticon.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://www.flaticon.com/></img>
+                                <div class="header">flaticon </div>
+                                <div class="meta">634,000+ Free vector icons in SVG, PSD, PNG, EPS format or as ICON FONT.</div>
+                            </div>
+                        </a>
+                        <a class="card" href=http://ui-cloud.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=http://ui-cloud.com/></img>
+                                <div class="header">UICloud</div>
+                                <div class="meta">The largest user interface design database in the world.</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://fontawesome.com/icons/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://fontawesome.com/icons/></img>
+                                <div class="header">Font Awesome Icon</div>
+                                <div class="meta">The complete set of 675 icons in Font Awesome.</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://wallpaperaccess.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://wallpaperaccess.com/></img>
+                                <div class="header">Wallpaper</div>
+                                <div class="meta">4k wallpaper</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.pexels.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://www.pexels.com/></img>
+                                <div class="header">Wallpaper</div>
+                                <div class="meta">4k wallpaper</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://rare-gallery.com/tags/popular+desktop/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://rare-gallery.com/tags/popular+desktop/></img>
+                                <div class="header">Wallpaper</div>
+                                <div class="meta">4k wallpaper</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://alphacoders.com/grey target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://alphacoders.com/grey></img>
+                                <div class="header">Wallpaper</div>
+                                <div class="meta">4k wallpaper</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://unsplash.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://unsplash.com/></img>
+                                <div class="header">IMAGE</div>
+                                <div class="meta">FREE IMAGES</div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                <div class="ui basic segment">
+                    <h4 class="ui horizontal divider header">
+                        <i class="thumbs up outline icon"></i>
+                        平面素材
+                    </h4>
+                    <div class="ui five stackable cards">
+                        <a class="card" href=https://www.freepik.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://www.freepik.com/></img>
+                                <div class="header">freepik</div>
+                                <div class="meta">More than a million free vectors, PSD, photos and free icons.</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://wallhalla.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://wallhalla.com/></img>
+                                <div class="header">wallhalla</div>
+                                <div class="meta">Find awesome high quality wallpapers for desktop and mobile in one place.</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://365psd.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://365psd.com/></img>
+                                <div class="header">365PSD</div>
+                                <div class="meta">Free PSD &amp;Graphics, Illustrations.</div>
+                            </div>
+                        </a>
+                        <a class="card" href=http://www.58pic.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=http://www.58pic.com/></img>
+                                <div class="header">qiantu</div>
+                                <div class="meta">专注免费设计素材下载的网站.</div>
+                            </div>
+                        </a>
+                        <a class="card" href=http://90sheji.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=http://90sheji.com/></img>
+                                <div class="header">90sheji</div>
+                                <div class="meta">电商设计（淘宝美工）千图免费淘宝素材库。</div>
+                            </div>
+                        </a>
+                        <a class="card" href=http://www.lanrentuku.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=http://www.lanrentuku.com/></img>
+                                <div class="header">懒人图库</div>
+                                <div class="meta">懒人图库专注于提供网页素材下载</div>
+                            </div>
+                        </a>
+                        <a class="card" href=http://psefan.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=http://psefan.com/></img>
+                                <div class="header">PS 饭团网</div>
+                                <div class="meta">不一样的设计素材库！让自己的设计与众不同！</div>
+                            </div>
+                        </a>
+                        <a class="card" href=http://www.sccnn.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=http://www.sccnn.com/></img>
+                                <div class="header">素材中国</div>
+                                <div class="meta">免费素材共享平台</div>
+                            </div>
+                        </a>
+                        <a class="card" href=http://www.pixiv.net/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=http://www.pixiv.net/></img>
+                                <div class="header">pixiv</div>
+                                <div class="meta">素材平台</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.astrobin.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://www.astrobin.com/></img>
+                                <div class="header">astrobin</div>
+                                <div class="meta">天文摄影圣地</div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                <div class="ui basic segment">
+                    <h4 class="ui horizontal divider header">
+                        <i class="gulp icon"></i>
+                        界面设计
+                    </h4>
+                    <div class="ui five stackable cards">
+                        <a class="card" href=https://creative.adobe.com/zh-cn/products/download/muse target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://creative.adobe.com/zh-cn/products/download/muse></img>
+                                <div class="header">Muse CC</div>
+                                <div class="meta">无需利用编码即可进行网站设计。</div>
+                            </div>
+                        </a>
+                        <a class="card" href=http://www.adobe.com/products/xd.html target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=http://www.adobe.com/products/xd.html></img>
+                                <div class="header">Adobe XD</div>
+                                <div class="meta">Introducing Adobe XD. Design. Prototype. Experience.</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://sketchapp.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://sketchapp.com/></img>
+                                <div class="header">Sketch</div>
+                                <div class="meta">The digital design toolkit</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.figma.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://www.figma.com/></img>
+                                <div class="header">figma</div>
+                                <div class="meta">Design, prototype, and gather feedback all in one place with Figma.</div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                <div class="ui basic segment">
+                    <h4 class="ui horizontal divider header">
+                        <i class="searchengin icon"></i>
+                        在线工具
+                    </h4>
+                    <div class="ui five stackable cards">
+                        <a class="card" href=https://tinypng.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://tinypng.com/></img>
+                                <div class="header">tinypng</div>
+                                <div class="meta">Optimize your images with a perfect balance in quality and file size.</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://ezgif.com target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://ezgif.com></img>
+                                <div class="header">ezgif</div>
+                                <div class="meta">simple online GIF maker and toolset for basic animated GIF editing.</div>
+                            </div>
+                        </a>
+                        <a class="card" href=http://screensiz.es/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=http://screensiz.es/></img>
+                                <div class="header">screen sizes</div>
+                                <div class="meta">Viewport Sizes and Pixel Densities for Popular Devices.</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://jakearchibald.github.io/svgomg/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://jakearchibald.github.io/svgomg/></img>
+                                <div class="header">svgomg</div>
+                                <div class="meta">SVG 在线压缩平台。</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.gaoding.com target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://www.gaoding.com></img>
+                                <div class="header">稿定抠图</div>
+                                <div class="meta">免费在线抠图软件,图片快速换背景-抠白底图。</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://doocs.github.io/md/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://doocs.github.io/md/></img>
+                                <div class="header">wechat Markdown</div>
+                                <div class="meta">文档编辑</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://uptimerobot.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://uptimerobot.com/></img>
+                                <div class="header">UptimeRobot</div>
+                                <div class="meta">php运行监控机器人</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://console.cron-job.org/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://console.cron-job.org/></img>
+                                <div class="header">Cron-job</div>
+                                <div class="meta">任务机器人</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.uuidgenerator.net/version4 target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://www.uuidgenerator.net/version4></img>
+                                <div class="header">UUID</div>
+                                <div class="meta">UUID在线生成。</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://tinywow.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://tinywow.com/></img>
+                                <div class="header">FREE AI</div>
+                                <div class="meta">FREE PDF,VIDEO,IMAGE ETC</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://flowith.io/blank target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://flowith.io/blank></img>
+                                <div class="header">DS R1_BK</div>
+                                <div class="meta">AI_BK</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://sink.freedogs.us.kg/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://sink.freedogs.us.kg/></img>
+                                <div class="header">短链工具</div>
+                                <div class="meta">……</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.nazhumi.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://www.nazhumi.com/></img>
+                                <div class="header">哪煮米</div>
+                                <div class="meta">域名在线询价</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.filehorse.com/software-file-transfer-and-networking/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://www.filehorse.com/software-file-transfer-and-networking/></img>
+                                <div class="header">FREE APP</div>
+                                <div class="meta">PC软件 ETC</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://tool.oschina.net/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://tool.oschina.net/></img>
+                                <div class="header">encode</div>
+                                <div class="meta">在线编码转换</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://imgse.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://imgse.com/></img>
+                                <div class="header">imgse</div>
+                                <div class="meta">在线图床</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://shockvpn.com/dashboard/configs target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://shockvpn.com/dashboard/configs></img>
+                                <div class="header">SHOCK VPN</div>
+                                <div class="meta">WireGuard协议可自定义配置</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.jitbit.com/imgen/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://www.jitbit.com/imgen/></img>
+                                <div class="header">jitbit</div>
+                                <div class="meta">免费的封面生成api</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://status.deepseek.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://status.deepseek.com/></img>
+                                <div class="header">Deepseek Status</div>
+                                <div class="meta">api&chat Status</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://status.openai.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://status.openai.com/></img>
+                                <div class="header">OpenAI Status</div>
+                                <div class="meta">api&chat Status</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://status.eooce.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://status.eooce.com/></img>
+                                <div class="header">Host Status</div>
+                                <div class="meta">serv00 Host Status</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://app.zerossl.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://app.zerossl.com/></img>
+                                <div class="header">iP ssl</div>
+                                <div class="meta">免费iP证书</div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://matrix.tencent.com/ai-detect/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?sz= 64&domain_url=https://matrix.tencent.com/ai-detect/></img>
+                                <div class="header">AI check</div>
+                                <div class="meta">AI 检测</div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <footer>
+            <div class="footer">
+                Powered by
+                <a class="ui label" href="https://nav.lauuroo.eu.org/" target="_blank">
+                    <i class="github icon"></i>
+                    Cf-Worker-Monicia
+                </a>
+                &copy;Base on 
+                <a class="ui label">
+                    <i class="balance scale icon"></i>
+                    MIT License
+                </a>
+            </div>
+        </footer>
+        <div id="seller" class="ui basic modal">
+            <h1 class="ui yellow dividing header">
+                <i class="gem outline icon"></i>
+                <div class="content">nav.x.com 正在出售</div>
+            </h1>
+            <div class="content">
+                <div class="ui basic segment">
+                    <div class="ui two column stackable center aligned grid">
+                        <div class="ui inverted vertical divider">感兴趣？</div>
+                        <div class="middle aligned row">
+                            <div class="column">
+                                <div class="ui large yellow statistic">
+                                    <div class="value">
+                                        <i class="yen sign icon"></i>
+                                        1600
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="column">
+                                <h3 class="ui center aligned icon inverted header">
+                                    <i class="circular envelope open outline grey inverted icon"></i>
+                                    联系我
+                                </h3>
+                                <div class="ui relaxed celled large list">
+                                    <div class="item">
+                                        <i class="Mail icon"></i>
+                                        <div class="content">irr@x.x.xxx</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="actions">
+                <div class="ui basic cancel inverted button">
+                    <i class="reply icon"></i>
+                    返回
+                </div>
+            </div>
+        </div>
+        <script src="https://v1.hitokoto.cn/?encode=js&select=%23hitokoto" defer></script>
+        <script>
+            $('#sengine a').on('click', function(e) {
+                $('#sengine a.active').toggleClass('active');
+                $(e.target).toggleClass('active');
+                $('#search-fav').attr('src', $(e.target).data('url').match(/https{0,1}:\/\/\S+\//)[0] + '/favicon.ico');
+            });
+            $('.search').on('click', function(e) {
+                var url = $('#sengine a.active').data('url');
+                url = url.replace(/\$s/, $('#searchinput').val());
+                window.open(url);
+            });
+            /* 鼠标聚焦时，回车事件 */
+            $("#searchinput").bind("keypress", function() {
+                if (event.keyCode == 13) {
+                    // 触发需要调用的方法
+                    $(".search").click();
+                }
+            });
+            $('#menubtn').on('click', function(e) {
+                $('#seller').modal('show');
+            });
+        </script>
+        <script defer src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015" integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ==" data-cf-beacon='{"rayId":"93d5c04c0ca453f0","version":"2025.4.0-1-g37f21b1","r":1,"token":"a1462ff371fb4536a56a4175f99d2d77","serverTiming":{"name":{"cfExtPri":true,"cfL4":true,"cfSpeedBrain":true,"cfCacheStatus":true}}}' crossorigin="anonymous"></script>
+    </body>
+    <style>
+        /* 默认 (正常模式) 样式 */
+        body {
+            background-color: #d8e6e2;
+            color: #333;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* 暗黑模式的样式 */
+        body.dark-mode {
+            background-color: #1b1c1d;
+            /* 将背景色调亮一点 */
+            color: #fff;
+            /* 文字颜色改为白色 */
+        }
+
+        /* 右侧中央的暗黑模式开关按钮 */
+        #theme-toggle {
+            position: fixed;
+            right: 10px;
+            top: 10%;
+            transform: translateY(-50%);
+            background-color: transparent;
+            border: 3px solid #ccc;
+            color: #333;
+            padding: 10px;
+            cursor: pointer;
+            font-size: 18px;
+            z-index: 1000;
+            transition: color 0.3s, border-color 0.3s;
+        }
+
+        /* 暗黑模式下的按钮样式 */
+        body.dark-mode #theme-toggle {
+            border-color: #d8e6e2;
+            color: #fff;
+        }
+    </style>
+    <i class="china flag"></i>
+    <div class="ui list">
+        <div class="item">
+            <i class="map marker icon"></i>
+            <div class="content">
+                <a class="header">Krolewskie Jadlo</a>
+                <div style="font-style: Microsoft Sans Serif 50deg;">一个人，饭菜丰盛.</div>
+            </div>
+        </div>
+        <div class="item">
+            <i class="map marker icon"></i>
+            <div class="content">
+                <a class="header">Xian Famous Foods</a>
+                <div style="font-style: Microsoft Sans Serif 50deg;">麻辣冷面和羊肉夹馍.</div>
+            </div>
+        </div>
+        <div class="item">
+            <i class="map marker icon"></i>
+            <div class="content">
+                <a class="header">Sapporo Haru</a>
+                <div style="font-style: Microsoft Sans Serif 50deg;">偶尔吞两块寿司.</div>
+            </div>
+        </div>
+    </div>
+    <div class="ui icon message">
+        <i class="notched circle loading icon"></i>
+        <div class="content">
+            <div class="header">Just one second
+    </div>
+            <p>We're fetching that content for you.</p>
+        </div>
+    </div>
+    <div id="sakana-widget" style="position: fixed;bottom: 20px;right:40px;"></div>
+    <script>
+        function initSakanaWidget() {
+            const takina = SakanaWidget.getCharacter('takina');
+            takina.initialState = {
+                ...takina.initialState,
+                i: 0.001,
+                d: 1,
+            };
+            SakanaWidget.registerCharacter('takina-slow', takina);
+            new SakanaWidget({
+                autoFit: true
+            }).setState({
+                i: 0.001,
+                d: 1
+            }).mount('#sakana-widget');
+        }
+    </script>
+    <script async onload="initSakanaWidget()" src="https://cdn.jsdelivr.net/npm/sakana-widget@2.2.2/lib/sakana.min.js"></script>
+</html>
